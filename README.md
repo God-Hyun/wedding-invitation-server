@@ -1,62 +1,60 @@
 # 모바일 청첩장 서버
 
-이 프로젝트는 [모바일 청첩장](https://github.com/juhonamnam/wedding-invitation) 웹 애플리케이션의 백엔드 서버입니다. 모바일 청첩장에 필요한 API 엔드포인트와 데이터베이스 관리 기능을 제공합니다. 모바일 청첩장에 필요한 간단한 기능만 구현하였으며, 트래픽이 많지 않은 환경이기에 SQLite를 사용합니다.
+신호현 ❤️ 윤유진 결혼식 모바일 청첩장의 백엔드 서버입니다.
 
-## 사전 요구사항
+- **프론트엔드**: https://wedding-invitation-woad-nu.vercel.app
+- **배포**: Render (Free tier)
+- **관리자 페이지**: https://wedding-invitation-server-d373.onrender.com/admin
 
-- Go 1.18
+## 기술 스택
+
+- Go 1.18+
+- SQLite (github.com/mattn/go-sqlite3)
+- CORS (github.com/rs/cors)
 
 ## 제공 기능
 
-- 방명록 작성 및 조회 API
-  - 관리자 비밀번호를 통한 방명록 강제 삭제 기능
+- 방명록 작성 / 조회 / 삭제 API
+  - 관리자 비밀번호(`ADMIN_PASSWORD`)로 강제 삭제 가능
 - 참석 의사 전달 API
-  - 참석자 조회 기능은 현재 미구현 상태
+- 관리자 페이지 (`/admin`) — 참석 명단 조회 및 삭제
 
-## 시작하기
+## 환경변수
 
-1. 저장소 복제:
+| 변수 | 설명 |
+|------|------|
+| `ALLOW_ORIGIN` | 허용할 프론트엔드 도메인 (예: `https://xxx.vercel.app`) |
+| `ADMIN_PASSWORD` | 관리자 비밀번호 (방명록 강제 삭제, /admin 로그인) |
+| `PORT` | 서버 포트 (기본값: 8080) |
 
-   ```bash
-   git clone https://github.com/juhonamnam/wedding-invitation-server.git
-   cd wedding-invitation-server
-   ```
+## 로컬 실행
 
-2. 의존성 설치:
+```bash
+git clone https://github.com/God-Hyun/wedding-invitation-server.git
+cd wedding-invitation-server
+go mod download
 
-   ```bash
-   go mod download
-   ```
+# .env 파일 생성
+echo "ALLOW_ORIGIN=http://localhost:3000" > .env
+echo "ADMIN_PASSWORD=your_password" >> .env
 
-3. 환경변수 설정:
+go run app.go
+# → http://localhost:8080
+```
 
-   환경변수 샘플은 `.env.example` 파일에 저장되어 있습니다. 이 파일을 복사하여 `.env` 파일을 생성하고 각 환경변수를 수정합니다.
+## API 엔드포인트
 
-   ```bash
-   cp .env.example .env
-   ```
+| 메서드 | 경로 | 설명 |
+|--------|------|------|
+| GET | `/api/guestbook?offset=0&limit=5` | 방명록 조회 |
+| POST | `/api/guestbook` | 방명록 작성 |
+| PUT | `/api/guestbook` | 방명록 삭제 (비밀번호 필요) |
+| POST | `/api/attendance` | 참석 의사 전달 |
+| GET | `/admin` | 관리자 로그인 페이지 |
+| POST | `/admin` | 참석 명단 조회 / 삭제 |
 
-   - `ALLOW_ORIGIN`
-     - 허용할 도메인
-   - `ADMIN_PASSWORD`
-     - 관리자 전용 비밀번호
-     - 방명록 강제 삭제를 원하는 경우 해당 비밀번호로 삭제 가능
+## Render 배포
 
-4. 서버 실행:
-   ```bash
-   go run app.go
-   ```
-
-   서버가 기본적으로 `http://localhost:8080`에서 실행됩니다.
-
-## 배포하기
-
-1. 프로젝트 빌드:
-   ```bash
-   go build
-   ```
-
-2. 빌드된 바이너리 실행:
-   ```bash
-   ./wedding-invitation-server
-   ```
+- Build Command: `go build -tags netgo -ldflags '-s -w' -o app`
+- Start Command: `./app`
+- 환경변수: `ALLOW_ORIGIN`, `ADMIN_PASSWORD`
