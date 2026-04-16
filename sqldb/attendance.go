@@ -51,6 +51,11 @@ func GetAllAttendance() ([]AttendanceRow, error) {
 	return result, nil
 }
 
+func DeleteAttendance(id int) error {
+	_, err := sqlDb.Exec(`DELETE FROM attendance WHERE id = ?`, id)
+	return err
+}
+
 func CreateAttendance(side, name, meal string, count int) error {
 	_, err := sqlDb.Exec(`
 		INSERT INTO attendance (side, name, meal, count, timestamp)

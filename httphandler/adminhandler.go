@@ -3,6 +3,7 @@ package httphandler
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/juhonamnam/wedding-invitation-server/env"
@@ -23,12 +24,21 @@ func (h *AdminHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		r.ParseForm()
 		password := r.FormValue("password")
+		action := r.FormValue("action")
 
 		if env.AdminPassword == "" || password != env.AdminPassword {
 			w.Header().Set("Content-Type", "text/html; charset=utf-8")
 			w.WriteHeader(http.StatusUnauthorized)
 			w.Write([]byte(loginPageWithError))
 			return
+		}
+
+		if action == "delete" {
+			idStr := r.FormValue("id")
+			id, err := strconv.Atoi(idStr)
+			if err == nil {
+				sqldb.DeleteAttendance(id)
+			}
 		}
 
 		rows, err := sqldb.GetAllAttendance()
@@ -70,7 +80,13 @@ func (h *AdminHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				<td>%s</td>
 				<td>%d명</td>
 				<td>%s</td>
-			</tr>`, sideLabel, row.Name, mealLabel, row.Count, t.Format("01/02 15:04"))
+				<td><form method="POST" onsubmit="return confirm('삭제하시겠습니까?')">
+					<input type="hidden" name="password" value="%s">
+					<input type="hidden" name="action" value="delete">
+					<input type="hidden" name="id" value="%d">
+					<button type="submit" style="background:#e55;color:white;border:none;padding:4px 10px;border-radius:4px;cursor:pointer">삭제</button>
+				</form></td>
+			</tr>`, sideLabel, row.Name, mealLabel, row.Count, t.Format("01/02 15:04"), password, row.Id)
 		}
 
 		html := fmt.Sprintf(attendancePage, totalCount, groomCount, brideCount, mealCount, tableRows)
@@ -157,7 +173,7 @@ const attendancePage = `<!DOCTYPE html>
   <div class="card"><div class="label">식사 예정</div><div class="value">%d명</div></div>
 </div>
 <table>
-  <thead><tr><th>구분</th><th>성함</th><th>식사</th><th>인원</th><th>제출 시간</th></tr></thead>
+  <thead><tr><th>구분</th><th>성함</th><th>식사</th><th>인원</th><th>제출 시간</th><th></th></tr></thead>
   <tbody>%s</tbody>
 </table>
 </body></html>`
