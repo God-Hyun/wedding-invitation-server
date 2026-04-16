@@ -25,6 +25,7 @@ func main() {
 	mux := http.NewServeMux()
 	mux.Handle("/api/guestbook", new(httphandler.GuestbookHandler))
 	mux.Handle("/api/attendance", new(httphandler.AttendanceHandler))
+	mux.Handle("/admin", new(httphandler.AdminHandler))
 
 	corHandler := cors.New(cors.Options{
 		AllowedOrigins:   []string{env.AllowOrigin},
