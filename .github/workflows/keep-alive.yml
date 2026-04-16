@@ -3,6 +3,7 @@ name: Keep Render Alive
 on:
   schedule:
     - cron: "*/14 * * * *"  # 14분마다 실행
+  workflow_dispatch:  # 수동 실행 가능
 
 jobs:
   ping:
